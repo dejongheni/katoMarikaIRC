@@ -180,6 +180,10 @@ while (is_resource($socket)){
         }else{
           if(in_array($demandeur, $opList)){
             if(!is_null($d[4])&&!is_null($d[5])&&($d[4]!='')&&($d[5]!='')){
+              if(!$autoKickOn){
+                $autokick=true;
+                socket_write($socket, 'PRIVMSG '.$d[2]." :J'active l'auto kick, si vous floodez trop, je vous vire <3\r\n");
+              }
               $kickDelaiMax=intval($d[4]);
               $kickNombreMessagesMax=intval($d[5]);
               socket_write($socket, 'PRIVMSG '.$d[2].' :Le nouveau nombre de messages maximum en '.$kickDelaiMax.'s est de '.$kickNombreMessagesMax.".\r\n");
