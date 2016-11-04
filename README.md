@@ -1,5 +1,5 @@
 ## KatoMarika
-Bot IRC pour le channel #pathey, codé en PHP. Il est nécessaire qu'il soit OP du channel pour avoir accès à la plupart des fonctionnalités
+Bot IRC pour le channel #pathey, codé en PHP. Il est nécessaire qu'il soit OP du channel et qu'il ait au moins le flag F (le mieux est qu'il ait tous les flags) pour avoir accès à toutes les fonctionnalités
 #Liste des commandes
 * .help : Affiche la lsite des commandes
 * .op : Affiche les utilisateurs considérés comme OP du bot
