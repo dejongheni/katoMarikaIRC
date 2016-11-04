@@ -181,7 +181,7 @@ while (is_resource($socket)){
           if(in_array($demandeur, $opList)){
             if(!is_null($d[4])&&!is_null($d[5])&&($d[4]!='')&&($d[5]!='')){
               if(!$autoKickOn){
-                $autokick=true;
+                $autoKickOn=true;
                 socket_write($socket, 'PRIVMSG '.$d[2]." :J'active l'auto kick, si vous floodez trop, je vous vire <3\r\n");
               }
               $kickDelaiMax=intval($d[4]);
