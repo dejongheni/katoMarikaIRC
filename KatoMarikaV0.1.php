@@ -190,6 +190,7 @@ while (is_resource($socket)){
             }else{
               if($autoKickOn){
                 socket_write($socket, 'PRIVMSG '.$d[2]." :Je désactive l'auto kick, mais évitez quand même de flood ;)\r\n");
+                $autoKickOn=false;
               }else{
                 socket_write($socket, 'PRIVMSG '.$d[2]." :J'active l'auto kick, si vous floodez trop, je vous vire <3\r\n");
                 if(!is_null($d[4])&&!is_null($d[5])&&($d[4]!='')&&($d[5]!='')){
@@ -197,8 +198,8 @@ while (is_resource($socket)){
                   $kickNombreMessagesMax=intval($d[5]);
                 }
                 socket_write($socket, 'PRIVMSG '.$d[2].' :Le nombre de messages maximum en '.$kickDelaiMax.'s est de '.$kickNombreMessagesMax.".\r\n");
+                $autoKickOn=true;
               }
-              $autoKickOn=!$autoKickOn;
             }
           }else{
           	socket_write($socket, 'PRIVMSG '.$d[2]." :Tu n'as aucune autorité sur moi !\r\n");
