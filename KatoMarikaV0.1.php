@@ -160,6 +160,7 @@ while (is_resource($socket)){
     socket_write($socket, 'PRIVMSG '.$demandeur.' :  '.$prefixe."autokick : J'active ou désactive l'autokick\r\n");
     socket_write($socket, 'PRIVMSG '.$demandeur.' :  '.$prefixe."autokick delai messsage: J'active l'autokick et change le nombre de messages autorisés en delai secondes\r\n");
     socket_write($socket, 'PRIVMSG '.$demandeur.' :  '.$prefixe."autokick help : Je dis si l'autokick est activé ou non et affiche le nombre de messages maximum pendant quelle durée\r\n");
+    socket_write($socket, 'PRIVMSG '.$demandeur.' :  '.$prefixe."radio : J'annonce les musiques en cours de diffusion sur http://j-pop.moe\r\n");
   }else{
     //.test : renvois ce que l'user écris après .test
     if ($d[3]==':'.$prefixe.'test'){
@@ -354,6 +355,16 @@ while (is_resource($socket)){
                           socket_write($socket, 'PRIVMSG '.$channel.' :'.$dire."\r\n");
                         }else{
                           socket_write($socket, 'PRIVMSG '.$channel." :Vaurien ! Mécréant !! Ne me fait pas dire des trucs étranges $demandeur !\r\n");
+                        }
+                      }else{
+                        if ($d[3]==':'.$prefixe.'radio'){
+                          $radiotag=file_get_contents("/var/www/j-pop/music-names.txt");
+                          $radiotag=explode("||",$radiotag);
+                          $radio=$radiotag[0];
+                          $miku=$radiotag[1];
+                          socket_write($socket, 'PRIVMSG '.$channel.' : Actuellement sur http://j-pop.moe : '."\r\n");
+                          socket_write($socket, 'PRIVMSG '.$channel.' : J-pop : '.$radio."\r\n");
+                          socket_write($socket, 'PRIVMSG '.$channel.' : Miku : '.$miku."\r\n");
                         }
                       }
                     }
