@@ -362,9 +362,9 @@ while (is_resource($socket)){
                           $radiotag=explode("||",$radiotag);
                           $radio=$radiotag[0];
                           $miku=$radiotag[1];
-                          socket_write($socket, 'PRIVMSG '.$channel.' : Actuellement sur http://j-pop.moe : '."\r\n");
-                          socket_write($socket, 'PRIVMSG '.$channel.' : J-pop : '.$radio."\r\n");
-                          socket_write($socket, 'PRIVMSG '.$channel.' : Miku : '.$miku."\r\n");
+                          socket_write($socket, 'PRIVMSG '.$d[2].' : Actuellement sur http://j-pop.moe : '."\r\n");
+                          socket_write($socket, 'PRIVMSG '.$d[2].' : J-pop : '.$radio."\r\n");
+                          socket_write($socket, 'PRIVMSG '.$d[2].' : Miku : '.$miku."\r\n");
                         }
                       }
                     }
