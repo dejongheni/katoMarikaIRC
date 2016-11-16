@@ -11,7 +11,7 @@ $password = $argv[1];
 $nickname = 'KatoMarika';
 $ident = 'v1.0';
 $gecos = 'Bot Kato Marika v1.0';
-$channel = "#pathey";
+$channel = "#bentenmaru";
 
 //set les variables utilisées dans certaines commandes irc
 $opList=array();
@@ -139,7 +139,7 @@ while (is_resource($socket)){
       array_push($opList, $nouvPseudo);
     }
   }
-
+  echo $d[3];
   switch($d[3]){
     case ':'.$prefixe.'help':
       help($d);
