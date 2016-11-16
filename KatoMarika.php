@@ -365,8 +365,12 @@ function changePrefixe($d){
   $tab=explode("!",$demandeur);
   $demandeur=$tab[0];
   if(in_array($demandeur, $opList)){
-    $prefixe=$d[4];
-    socket_write($socket, 'PRIVMSG '.$d[2]." :Le nouveau préfixe de mes commandes est ".$prefixe."\r\n");
+    if((!is_null($d[4]))&&($d[4]!='')){
+      $prefixe=$d[4];
+      socket_write($socket, 'PRIVMSG '.$d[2]." :Le nouveau préfixe de mes commandes est ".$prefixe."\r\n");
+    }else{
+      socket_write($socket, 'PRIVMSG '.$d[2]." :Le préfixe de mes commandes est ".$prefixe."\r\n");
+    }
   }else{
     socket_write($socket, 'PRIVMSG '.$d[2]." :Ne touche pas à mes commandes, mécréant !\r\n");
   }
@@ -442,7 +446,7 @@ function radio($d){
   $radiotag=explode("||",$radiotag);
   $radio=$radiotag[0];
   $miku=$radiotag[1];
-  socket_write($socket, 'PRIVMSG '.$d[2].' : Actuellement sur http://j-pop.moe : '."\r\n");
+  socket_write($socket, 'PRIVMSG '.$d[2].' : Actuellement sur https://j-pop.moe : '."\r\n");
   socket_write($socket, 'PRIVMSG '.$d[2].' : J-pop : '.$radio."\r\n");
   socket_write($socket, 'PRIVMSG '.$d[2].' : Miku : '.$miku."\r\n");
 }
