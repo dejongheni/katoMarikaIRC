@@ -1,4 +1,5 @@
 <?php
+define(VERSION, 'v1.0');
 //Le script de la mocheté pour un bot IRC sur un serveur utilisant ChanServ gérant différents aspects tels que l'autokick pour flood,
 //l'autorisation de parler sur un channel modéré,...
 //doit avoir les droits OP et les droits de set les flags (donc le flag +F, le mieux est qu'il ait tout les flags)
@@ -10,8 +11,8 @@ $server = $config['irc']['server'];
 $port = $config['irc']['port'];
 $password = $config['bot']['password'];
 $nickname = $config['bot']['nickname'];
-$ident = 'v1.0';
-$gecos = 'Bot Kato Marika v1.0';
+$ident = VERSION;
+$gecos = 'Bot Kato Marika ' . VERSION;
 $channel = $config['irc']['channel'];
 
 
