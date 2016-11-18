@@ -5,17 +5,51 @@
 //par Kornakh
 
 //set les variables de connection
-$server = 'chat.freenode.net';
-$port = 6667;
-$password = $argv[1];
-$nickname = 'KatoMarika';
+$config = parseConfiFile($argv);
+$server = $config['irc']['server'];
+$port = $config['irc']['port'];
+$password = $config['bot']['password'];
+$nickname = $config['bot']['nickname'];
 $ident = 'v1.0';
 $gecos = 'Bot Kato Marika v1.0';
-$channel = "#bentenmaru";
+$channel = $config['irc']['channel'];
 
 
 $bentenmaru=new KatoMarika($server,$port,$password,$nickname,$ident,$gecos,$channel);
 $bentenmaru->connection();
+function parseConfiFile($argv){
+  if(file_exists('config.ini')){
+    $config = parse_ini_file('config.ini',true);
+    if(empty($config['irc']['server'])){
+      $config['irc']['server'] = 'chat.freenode.net';
+    }
+    if(empty($config['irc']['port'])){
+      $config['irc']['port'] = 6667;
+    }
+    if(empty($config['irc']['channel'])){
+      $config['irc']['channel'] = 'bentenmaru';
+    }
+    if(empty($config['bot']['nickname'])){
+      $config['bot']['nickname'] = 'KatoMarika';
+    }
+    if(empty($config['bot']['password'])){
+      $config['bot']['password'] = $argv[1];
+    }
+    return $config;
+  }else{
+    $defaultConfig = "[irc]
+server =chat.freenode.net
+port=6667
+channel=bentenmaru
+
+[bot]
+nickname=KatoMarika
+;password=";
+    file_put_contents('config.ini',$defaultConfig);
+    file_put_contents('php://stderr', "Fichier de configuration créé, éditez-le puis relancez le bot.\n");
+    exit(1);
+  }
+}
 class KatoMarika{
   //set les variables utilisées dans certaines commandes irc
   private $opList=array();
