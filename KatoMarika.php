@@ -1,5 +1,5 @@
 <?php
-define(VERSION, 'v1.0');
+define('VERSION', 'v1.0');
 //Le script de la mocheté pour un bot IRC sur un serveur utilisant ChanServ gérant différents aspects tels que l'autokick pour flood,
 //l'autorisation de parler sur un channel modéré,...
 //doit avoir les droits OP et les droits de set les flags (donc le flag +F, le mieux est qu'il ait tout les flags)
@@ -123,11 +123,18 @@ class KatoMarika{
 
       //fait un message random quand le bot est mensionné
       if (!empty(preg_grep('*'.$this->nickname.'*i' ,$d))&&$d[1]=='PRIVMSG'&&$d[2]==$this->channel){
+        //affiche le préfixe si il est demandé
         if (!empty(preg_grep('*pr[ée]fix*i' ,$d))&&$d[1]=='PRIVMSG'){
           socket_write($this->socket, 'PRIVMSG '.$d[2]." :Le préfixe actuel est ".$this->prefixe."\r\n");
         }else{
-          $phrase=$this->tabPhrases[array_rand($this->tabPhrases)];
-          socket_write($this->socket, 'PRIVMSG '.$d[2]." :".$phrase."\r\n");
+          if(!empty($plouf=preg_grep('/([1-9]|10)d([1-9][0-9]*)/',$d))&&$d[1]=='PRIVMSG'){
+            $plouf=array_values($plouf);
+            $des=explode("d", $plouf[0]);
+            $this->roll($des[0], $des[1]);
+          }else{
+            $phrase=$this->tabPhrases[array_rand($this->tabPhrases)];
+            socket_write($this->socket, 'PRIVMSG '.$d[2]." :".$phrase."\r\n");
+          }
         }
       }
 
@@ -192,7 +199,7 @@ class KatoMarika{
           array_push($this->opList, $nouvPseudo);
         }
       }
-      echo $d[3];
+
       switch($d[3]){
         case ':'.$this->prefixe.'help':
           $this->help($d);
@@ -240,6 +247,11 @@ class KatoMarika{
 
         case ':'.$this->prefixe.'radio':
           $this->radio($d);
+          break;
+
+        case ':'.$this->prefixe.'roll':
+          $des=explode("d", $d[4]);
+          $this->roll($des[0], $des[1]);
           break;
       }
 
@@ -289,6 +301,7 @@ class KatoMarika{
     socket_write($this->socket, 'NOTICE '.$demandeur.' :  '.$this->prefixe."autokick delai messsage: J'active l'autokick et change le nombre de messages autorisés en delai secondes\r\n");
     socket_write($this->socket, 'NOTICE '.$demandeur.' :  '.$this->prefixe."autokick help : Je dis si l'autokick est activé ou non et affiche le nombre de messages maximum pendant quelle durée\r\n");
     socket_write($this->socket, 'NOTICE '.$demandeur.' :  '.$this->prefixe."radio : J'annonce les musiques en cours de diffusion sur http://j-pop.moe\r\n");
+    socket_write($this->socket, 'NOTICE '.$demandeur.' :  '.$this->prefixe.".roll ndf: Je lance n dés f, avec un maximum de 10 dés\r\n");
   }
 
   function test($d){
@@ -503,11 +516,39 @@ class KatoMarika{
     $radiotag=explode("||",$radiotag);
     $radio=$radiotag[0];
     $miku=$radiotag[1];
-    socket_write($this->socket, 'PRIVMSG '.$d[2].' : Actuellement sur https://j-pop.moe : '."\r\n");
+    socket_write($this->socket, 'PRIVMSG '.$d[2].' :Actuellement sur https://j-pop.moe : '."\r\n");
     socket_write($this->socket, 'PRIVMSG '.$d[2].' : J-pop : '.$radio."\r\n");
     socket_write($this->socket, 'PRIVMSG '.$d[2].' : Miku : '.$miku."\r\n");
   }
 
+  function roll($des, $faces){
+    if ($des<=10){
+      if ($des==1){
+        $plouf=mt_rand(1, $faces);
+        socket_write($this->socket, 'PRIVMSG '.$this->channel.' :Je lance '.$des.'d'.$faces.' !'."\r\n");
+        socket_write($this->socket, 'PRIVMSG '.$this->channel.' : Résultat : '.$plouf."\r\n");
+      }else{
+        $total=0;
+        $listeDes='';
+        for ($i=0 ; $i < $des ; $i++) {
+          $plouf=mt_rand(1, $faces);
+          $total+=$plouf;
+          if($i<$des-1){
+            $listeDes=$listeDes.$plouf.', ';
+          }else{
+            $listeDes=$listeDes.$plouf;
+          }
+        }
+        socket_write($this->socket, 'PRIVMSG '.$this->channel.' :Je lance '.$des.'d'.$faces.' !'."\r\n");
+        socket_write($this->socket, 'PRIVMSG '.$this->channel.' : Résultats : '.$listeDes."\r\n");
+        socket_write($this->socket, 'PRIVMSG '.$this->channel.' : Total : '.$total."\r\n");
+      }
+
+    }else{
+      socket_write($this->socket, 'PRIVMSG '.$this->channel.' :Je ne peux pas lancer autant de dés :('."\r\n");
+    }
+
+  }
 }
 
 ?>
