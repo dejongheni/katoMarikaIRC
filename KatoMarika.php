@@ -522,36 +522,35 @@ class KatoMarika{
   }
 
   function roll($des, $faces){
-    if ($des<=10){
-      if ($des==1){
-        $plouf=mt_rand(1, $faces);
-        socket_write($this->socket, 'PRIVMSG '.$this->channel.' :Je lance '.$des.'d'.$faces.' !'."\r\n");
-        socket_write($this->socket, 'PRIVMSG '.$this->channel.' : Résultat : '.$plouf."\r\n");
-      }else{
-        $total=0;
-        $listeDes='';
-        for ($i=0 ; $i < $des ; $i++) {
-          $plouf=mt_rand(1, $faces);
-          $total+=$plouf;
-          if($i<$des-1){
-            $listeDes=$listeDes.$plouf.', ';
-          }else{
-            $listeDes=$listeDes.$plouf;
-          }
-        }
-        socket_write($this->socket, 'PRIVMSG '.$this->channel.' :Je lance '.$des.'d'.$faces.' !'."\r\n");
-        socket_write($this->socket, 'PRIVMSG '.$this->channel.' : Résultats : '.$listeDes."\r\n");
-        socket_write($this->socket, 'PRIVMSG '.$this->channel.' : Total : '.$total."\r\n");
-      }
-
+    if($faces==0||$des==0){
+      socket_write($this->socket, 'PRIVMSG '.$this->channel.' :Donnes moi des dés valides !'."\r\n");
     }else{
-      if($faces==0){
-        socket_write($this->socket, 'PRIVMSG '.$this->channel.' :Précise moi un nombre de faces !'."\r\n");
+      if ($des<=10){
+        if ($des==1){
+          $plouf=mt_rand(1, $faces);
+          socket_write($this->socket, 'PRIVMSG '.$this->channel.' :Je lance '.$des.'d'.$faces.' !'."\r\n");
+          socket_write($this->socket, 'PRIVMSG '.$this->channel.' : Résultat : '.$plouf."\r\n");
+        }else{
+          $total=0;
+          $listeDes='';
+          for ($i=0 ; $i < $des ; $i++) {
+            $plouf=mt_rand(1, $faces);
+            $total+=$plouf;
+            if($i<$des-1){
+              $listeDes=$listeDes.$plouf.', ';
+            }else{
+              $listeDes=$listeDes.$plouf;
+            }
+          }
+          socket_write($this->socket, 'PRIVMSG '.$this->channel.' :Je lance '.$des.'d'.$faces.' !'."\r\n");
+          socket_write($this->socket, 'PRIVMSG '.$this->channel.' : Résultats : '.$listeDes."\r\n");
+          socket_write($this->socket, 'PRIVMSG '.$this->channel.' : Total : '.$total."\r\n");
+        }
+
       }else{
         socket_write($this->socket, 'PRIVMSG '.$this->channel.' :Je ne peux pas lancer autant de dés :('."\r\n");
       }
     }
-
   }
 }
 
