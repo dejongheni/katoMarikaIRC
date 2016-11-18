@@ -300,8 +300,8 @@ class KatoMarika{
     socket_write($this->socket, 'NOTICE '.$demandeur.' :  '.$this->prefixe."autokick : J'active ou désactive l'autokick\r\n");
     socket_write($this->socket, 'NOTICE '.$demandeur.' :  '.$this->prefixe."autokick delai messsage: J'active l'autokick et change le nombre de messages autorisés en delai secondes\r\n");
     socket_write($this->socket, 'NOTICE '.$demandeur.' :  '.$this->prefixe."autokick help : Je dis si l'autokick est activé ou non et affiche le nombre de messages maximum pendant quelle durée\r\n");
-    socket_write($this->socket, 'NOTICE '.$demandeur.' :  '.$this->prefixe."radio : J'annonce les musiques en cours de diffusion sur http://j-pop.moe\r\n");
-    socket_write($this->socket, 'NOTICE '.$demandeur.' :  '.$this->prefixe.".roll ndf: Je lance n dés f, avec un maximum de 10 dés\r\n");
+    socket_write($this->socket, 'NOTICE '.$demandeur.' :  '.$this->prefixe."radio : J'annonce les musiques en cours de diffusion sur https://j-pop.moe\r\n");
+    socket_write($this->socket, 'NOTICE '.$demandeur.' :  '.$this->prefixe."roll ndf: Je lance n dés f, avec un maximum de 10 dés\r\n");
   }
 
   function test($d){
@@ -552,6 +552,9 @@ class KatoMarika{
       }
     }
   }
+
+
+
 }
 
 ?>
