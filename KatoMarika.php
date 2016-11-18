@@ -88,7 +88,7 @@ class KatoMarika{
 
       //fait un message random quand le bot est mensionné
       if (!empty(preg_grep('*'.$this->nickname.'*i' ,$d))&&$d[1]=='PRIVMSG'&&$d[2]==$this->channel){
-        if (!empty(preg_grep('*préfixe*i' ,$d))&&$d[1]=='PRIVMSG'){
+        if (!empty(preg_grep('*pr[ée]fix*i' ,$d))&&$d[1]=='PRIVMSG'){
           socket_write($this->socket, 'PRIVMSG '.$d[2]." :Le préfixe actuel est ".$this->prefixe."\r\n");
         }else{
           $phrase=$this->tabPhrases[array_rand($this->tabPhrases)];
@@ -237,6 +237,7 @@ class KatoMarika{
     $demandeur=substr($d[0], 1);
     $tab=explode("!",$demandeur);
     $demandeur=$tab[0];
+    socket_write($this->socket, 'NOTICE '.$demandeur." :Je t'ai envoyé la liste de mes commandes en mp :)\r\n");
     socket_write($this->socket, 'PRIVMSG '.$demandeur.' :Je suis '.$this->nickname.', un bot pour gérer '.$this->channel.", j'espère que tu seras gentil avec moi <3\r\n");
     socket_write($this->socket, 'PRIVMSG '.$demandeur." :Je connais les commandes suivantes :\r\n");
     socket_write($this->socket, 'PRIVMSG '.$demandeur.' :  '.$this->prefixe."test : Je renvois l'identifiant de l'user ainsi que son message.\r\n");
@@ -349,7 +350,7 @@ class KatoMarika{
       }else{
         $opCo="Je ne considère personne comme op";
       }
-      socket_write($this->socket, 'PRIVMSG '.$demandeur.' :'.$opCo."\r\n");
+      socket_write($this->socket, 'NOTICE '.$demandeur.' :'.$opCo."\r\n");
     }
   }
 
@@ -457,9 +458,9 @@ class KatoMarika{
       for ($i=4; $i < $taille; $i++) {
         $dire=$dire.$d[$i].' ';
       }
-      socket_write($this->socket, 'PRIVMSG '.$this->channel.' :'.$dire."\r\n");
+      socket_write($this->socket, 'PRIVMSG '.$d[2].' :'.$dire."\r\n");
     }else{
-      socket_write($this->socket, 'PRIVMSG '.$this->channel." :Vaurien ! Mécréant !! Ne me fait pas dire des trucs étranges $demandeur !\r\n");
+      socket_write($this->socket, 'PRIVMSG '.$d[2]." :Vaurien ! Mécréant !! Ne me fait pas dire des trucs étranges $demandeur !\r\n");
     }
   }
 
