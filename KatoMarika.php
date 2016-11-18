@@ -545,7 +545,11 @@ class KatoMarika{
       }
 
     }else{
-      socket_write($this->socket, 'PRIVMSG '.$this->channel.' :Je ne peux pas lancer autant de dés :('."\r\n");
+      if($faces==0){
+        socket_write($this->socket, 'PRIVMSG '.$this->channel.' :Précise moi un nombre de faces !'."\r\n");
+      }else{
+        socket_write($this->socket, 'PRIVMSG '.$this->channel.' :Je ne peux pas lancer autant de dés :('."\r\n");
+      }
     }
 
   }
