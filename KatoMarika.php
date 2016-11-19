@@ -354,8 +354,10 @@ class KatoMarika{
     $tab=explode("!",$demandeur);
     $demandeur=$tab[0];
     if(in_array($demandeur, $this->opList)&&(!is_null($d[4]))&&($d[4]!='')){
-      array_push($this->opList, $d[4]);
-      $newOPDeb=$d[4];
+      if(!in_array($d[4], $this->opList)){
+        array_push($this->opList, $d[4]);
+        $newOPDeb=$d[4];
+      }
       $i=5;
       if((!is_null($d[$i]))&&($d[$i]!='')){
         $newOP=', ';
