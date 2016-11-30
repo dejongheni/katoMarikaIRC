@@ -15,4 +15,6 @@ Bot IRC pour le channel #pathey, codé en PHP. Il est nécessaire qu'il soit OP 
   * .autokick *help* : Affiche si l'autokick est activé ou non ainsi que le nombres de messages maximum et l'intervalle de temps
 * .trivia : Active ou désactive le trivia et l'autokick (le trivia est géré par un autre bot)
 * .say *plouf* : Écrit *plouf* dans l'irc
-* .test *plouf* : Écrit le pseudo, l'ident et l'IP de la personne qui a fait les commande, suivit de *plouf* 
+* .test *plouf* : Écrit le pseudo, l'ident et l'IP de la personne qui a fait les commande, suivit de *plouf*
+* .radio : Annonce les musiques en cours de diffusion sur https://j-pop.moe
+* .roll ndf : lance n dés à f faces
