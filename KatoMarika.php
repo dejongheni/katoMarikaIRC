@@ -124,7 +124,7 @@ class KatoMarika{
       //fait un message random quand le bot est mensionné
       if (!empty(preg_grep('*'.$this->nickname.'*i' ,$d))&&$d[1]=='PRIVMSG'&&$d[2]==$this->channel){
         //affiche le préfixe si il est demandé
-        if (!empty(preg_grep('*pr[ée]fix*i' ,$d))&&$d[1]=='PRIVMSG'){
+        if (!empty(preg_grep('*pr[ée]fix*ui' ,$d))&&$d[1]=='PRIVMSG'){
           socket_write($this->socket, 'PRIVMSG '.$d[2]." :Le préfixe actuel est ".$this->prefixe."\r\n");
         }else{
           if(!empty($plouf=preg_grep('/([1-9]|10)d([1-9][0-9]*)/',$d))&&$d[1]=='PRIVMSG'){
