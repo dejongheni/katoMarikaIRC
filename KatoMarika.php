@@ -514,11 +514,10 @@ class KatoMarika{
 
   function radio($d){
     if ($d[4]=="skip"){
-      $telnet=fsockopen("localhost", 1234);
+      $telnet=fsockopen("127.0.0.1", 1234);
       fwrite($telnet,"radio(dot)mp3.skip");
       socket_write($this->socket, 'PRIVMSG '.$d[2].' :Je viens de changer de chanson :) '."\r\n");
       fclose($telnet);
-      debug_print_backtrace();
     }else{
       $radiotag=file_get_contents("/var/www/j-pop/music-names.txt");
       $radiotag=explode("||",$radiotag);
