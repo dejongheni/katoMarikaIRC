@@ -512,13 +512,20 @@ class KatoMarika{
   }
 
   function radio($d){
-    $radiotag=file_get_contents("/var/www/j-pop/music-names.txt");
-    $radiotag=explode("||",$radiotag);
-    $radio=$radiotag[0];
-    $miku=$radiotag[1];
-    socket_write($this->socket, 'PRIVMSG '.$d[2].' :Actuellement sur https://j-pop.moe : '."\r\n");
-    socket_write($this->socket, 'PRIVMSG '.$d[2].' : J-pop : '.$radio."\r\n");
-    socket_write($this->socket, 'PRIVMSG '.$d[2].' : Miku : '.$miku."\r\n");
+    if ($d[4]=="skip"){
+      $telnet=fsockopen("localhost", 1234);
+      fwrite($telnet,"radio(dot)mp3.skip");
+      socket_write($this->socket, 'PRIVMSG '.$d[2].' :Je viens de changer de chanson :) '."\r\n");
+      fclose($telnet);
+    }else{
+      $radiotag=file_get_contents("/var/www/j-pop/music-names.txt");
+      $radiotag=explode("||",$radiotag);
+      $radio=$radiotag[0];
+      $miku=$radiotag[1];
+      socket_write($this->socket, 'PRIVMSG '.$d[2].' :Actuellement sur https://j-pop.moe : '."\r\n");
+      socket_write($this->socket, 'PRIVMSG '.$d[2].' : J-pop : '.$radio."\r\n");
+      socket_write($this->socket, 'PRIVMSG '.$d[2].' : Miku : '.$miku."\r\n");
+    }
   }
 
   function roll($des, $faces){
