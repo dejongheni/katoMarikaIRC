@@ -515,8 +515,12 @@ class KatoMarika{
   function radio($d){
     if ($d[4]=="skip"){
       $telnet=fsockopen("127.0.0.1", 1234);
-      fwrite($telnet,"radio(dot)mp3.skip");
-      socket_write($this->socket, 'PRIVMSG '.$d[2].' :Je viens de changer de chanson :) '."\r\n");
+      if($telnet){
+        fputs($telnet,"radio(dot)mp3.skip \r\n");
+        socket_write($this->socket, 'PRIVMSG '.$d[2].' :Je viens de changer de chanson :) '."\r\n");
+      }else{
+        socket_write($this->socket, 'PRIVMSG '.$d[2]." :La radio n'est pas lancée "."\r\n");
+      }
       fclose($telnet);
     }else{
       $radiotag=file_get_contents("/var/www/j-pop/music-names.txt");
