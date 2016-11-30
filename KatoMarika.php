@@ -97,7 +97,7 @@ class KatoMarika{
 
     //permet de maintenir la connection
     while (is_resource($this->socket)){
-
+      debug_print_backtrace();
       //prends les données du socket
       $data=trim(socket_read($this->socket, 1024, PHP_NORMAL_READ));
       echo $data."\n";
