@@ -97,7 +97,6 @@ class KatoMarika{
 
     //permet de maintenir la connection
     while (is_resource($this->socket)){
-      debug_print_backtrace();
       //prends les données du socket
       $data=trim(socket_read($this->socket, 1024, PHP_NORMAL_READ));
       echo $data."\n";
@@ -105,7 +104,7 @@ class KatoMarika{
       //sépares les données dans un tableau
       $d=explode(' ', $data);
 
-      //décale le tableau pour evider des erreurs de placement
+      //décale le tableau pour evider des erreurs de placement:q
       $d = array_pad($d, 10, '' );
 
       //gestion du ping, y répond par pong
@@ -519,6 +518,7 @@ class KatoMarika{
       fwrite($telnet,"radio(dot)mp3.skip");
       socket_write($this->socket, 'PRIVMSG '.$d[2].' :Je viens de changer de chanson :) '."\r\n");
       fclose($telnet);
+      debug_print_backtrace();
     }else{
       $radiotag=file_get_contents("/var/www/j-pop/music-names.txt");
       $radiotag=explode("||",$radiotag);
