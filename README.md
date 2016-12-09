@@ -18,3 +18,5 @@ Bot IRC pour le channel #pathey, codé en PHP. Il est nécessaire qu'il soit OP 
 * .test *plouf* : Écrit le pseudo, l'ident et l'IP de la personne qui a fait les commande, suivit de *plouf*
 * .radio : Annonce les musiques en cours de diffusion sur https://j-pop.moe
 * .roll ndf : lance n dés à f faces
+* .log : Affiche les x derniers user connectés (10 par défaut)
+* .log nb : Change le nombre d'user dans le log à nb

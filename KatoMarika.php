@@ -1,11 +1,11 @@
 <?php
 define('VERSION', 'v1.0');
-//Le script de la mocheté pour un bot IRC sur un serveur utilisant ChanServ gérant différents aspects tels que l'autokick pour flood,
+//Script PHP pour un bot IRC sur un serveur utilisant ChanServ gérant différents aspects tels que l'autokick pour flood,
 //l'autorisation de parler sur un channel modéré,...
 //doit avoir les droits OP et les droits de set les flags (donc le flag +F, le mieux est qu'il ait tout les flags)
 //par Kornakh
 
-//set les variables de connection
+//set les variables de connexion
 $config = parseConfiFile($argv);
 $server = $config['irc']['server'];
 $port = $config['irc']['port'];
@@ -58,6 +58,8 @@ class KatoMarika{
   private $kickDelaiMax=10;
   private $kickNombreMessagesMax=6;
   private $prefixe='.';
+  private $connexionHisto=array();
+  private $logUserMax=10;
 
   //tableau de ce que dis le bot lorsqu'un user JOIN
   private $tabBonjour=array("Bonjour","Salutations","Coucou","Yo","Salut","Hey");
@@ -165,6 +167,7 @@ class KatoMarika{
           socket_write($this->socket, 'PRIVMSG '.$d[2]." :".$Bonjour." tout le monde !\r\n");
         }else{
           socket_write($this->socket, 'PRIVMSG '.$d[2]." :".$Bonjour.' '.$user." !\r\n");
+          $this->connexionHistoAjout($user);
         }
 
       }
@@ -252,6 +255,10 @@ class KatoMarika{
           $des=explode("d", $d[4]);
           $this->roll($des[0], $des[1]);
           break;
+
+        case ':'.$this->prefixe.'log':
+          $this->appelConnexionHisto($d);
+          break;
       }
 
 
@@ -264,7 +271,7 @@ class KatoMarika{
       	if (!in_array($user, $this->opList)){
       		$timeStamp=time();
       		if (!isset($this->logFlood[$user])||!array_key_exists($user,$this->logFlood)){
-      			$this->logFlood=array($user=>array($timeStamp));
+      			$this->logFlood[$user]=array($timeStamp);
       		}else{
       			array_push($this->logFlood[$user], $timeStamp);
       			if(count($this->logFlood[$user])>$this->kickNombreMessagesMax){
@@ -301,6 +308,8 @@ class KatoMarika{
     socket_write($this->socket, 'NOTICE '.$demandeur.' :  '.$this->prefixe."autokick help : Je dis si l'autokick est activé ou non et affiche le nombre de messages maximum pendant quelle durée\r\n");
     socket_write($this->socket, 'NOTICE '.$demandeur.' :  '.$this->prefixe."radio : J'annonce les musiques en cours de diffusion sur https://j-pop.moe\r\n");
     socket_write($this->socket, 'NOTICE '.$demandeur.' :  '.$this->prefixe."roll ndf: Je lance n dés f, avec un maximum de 10 dés\r\n");
+    socket_write($this->socket, 'NOTICE '.$demandeur.' :  '.$this->prefixe."log : Log les '.$this->logUserMax.' derniers user connectés ()\r\n");
+    socket_write($this->socket, 'NOTICE '.$demandeur.' :  '.$this->prefixe."log nb: Change le nombre d'user max dans le log à nb\r\n");
   }
 
   function test($d){
@@ -565,8 +574,46 @@ class KatoMarika{
     }
   }
 
+  function connexionHistoAjout($user){
+    $timeStamp=time();
+    if (!isset($this->connexionHisto[$user])||!array_key_exists($user,$this->connexionHisto)){
+      $this->connexionHisto[$user]=array($timeStamp);
+    }else{
+      unset($this->connexionHisto[$user]);
+      $this->connexionHisto[$user]=array($timeStamp);
 
+    }
+    if(count($this->connexionHisto)>$this->logUserMax){
+      array_shift($this->connexionHisto);
+    }
+  }
 
+  function appelConnexionHisto($d){
+    $liste='';
+    if((!is_null($d[4]))&&($d[4]!='')){
+      $demandeur=substr($d[0], 1);
+      $tab=explode("!",$demandeur);
+      $demandeur=$tab[0];
+      if(in_array($demandeur, $this->opList)){
+        $this->logUserMax=$d[4];
+        socket_write($this->socket, 'PRIVMSG '.$d[2]." :Le nombre d'user dans le log est maintenant de ".$this->logUserMax."\r\n");
+      }else{
+        socket_write($this->socket, 'PRIVMSG '.$d[2]." :N'essaye pas de faire quoi que ce soit !"."\r\n");
+      }
+    }else{
+      socket_write($this->socket, 'PRIVMSG '.$this->channel.' :Voici les '.$this->logUserMax.' dernières personnes connectées :'."\r\n");
+      foreach ($this->connexionHisto as $key => $value) {
+        $time=time()-$value[0];
+        $sec=round($time%60, 0, PHP_ROUND_HALF_DOWN);
+        $time=$time/60;
+        $min=round($time%60, 0, PHP_ROUND_HALF_DOWN);
+        $time=$time/60;
+        $h=round($time%24, 0, PHP_ROUND_HALF_DOWN);
+        $time=round($time/24, 0, PHP_ROUND_HALF_DOWN);
+        socket_write($this->socket, 'PRIVMSG '.$this->channel.' : '.$key.' : '.$time.'j '.$h.'h '.$min.'min '.$sec."s \r\n");
+      }
+    }
+  }
 }
 
 ?>
