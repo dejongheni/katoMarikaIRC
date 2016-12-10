@@ -604,13 +604,10 @@ class KatoMarika{
       socket_write($this->socket, 'PRIVMSG '.$this->channel.' :Voici les '.$this->logUserMax.' dernières personnes connectées :'."\r\n");
       foreach ($this->connexionHisto as $key => $value) {
         $time=time()-$value[0];
-        $sec=round($time%60, 0, PHP_ROUND_HALF_DOWN);
-        $time=$time/60;
-        $min=round($time%60, 0, PHP_ROUND_HALF_DOWN);
-        $time=$time/60;
-        $h=round($time%24, 0, PHP_ROUND_HALF_DOWN);
-        $time=round($time/24, 0, PHP_ROUND_HALF_DOWN);
-        socket_write($this->socket, 'PRIVMSG '.$this->channel.' : '.$key.' : '.$time.'j '.$h.'h '.$min.'min '.$sec."s \r\n");
+        $dtF = new \DateTime('@0');
+        $dtT = new \DateTime("@$time");
+        $time= $dtF->diff($dtT)->format('%a j, %h h, %i min et %s s');
+        socket_write($this->socket, 'PRIVMSG '.$this->channel.' : '.$key.' : '.$time." \r\n");
       }
     }
   }
