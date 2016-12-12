@@ -20,3 +20,7 @@ Bot IRC pour le channel #pathey, codé en PHP. Il est nécessaire qu'il soit OP 
 * .roll ndf : lance n dés à f faces
 * .log : Affiche les x derniers user connectés (10 par défaut)
 * .log nb : Change le nombre d'user dans le log à nb
+* .note ajout titre note : Ajoute la note titre
+* .note liste : Liste les notes existantes
+* .note suppr titre : Supprime la note titre
+* .note select titre : Affiche la note titre
