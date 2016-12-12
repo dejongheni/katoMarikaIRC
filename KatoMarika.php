@@ -1,6 +1,6 @@
 <?php
 define('VERSION', 'v1.0');
-//Script PHP pour un bot IRC sur un serveur utilisant ChanServ gérant différents aspects tels que l'autokick pour flood,
+//Script PHP pour un bot IRC en français sur un serveur utilisant ChanServ gérant différents aspects tels que l'autokick pour flood,
 //l'autorisation de parler sur un channel modéré,...
 //doit avoir les droits OP et les droits de set les flags (donc le flag +F, le mieux est qu'il ait tout les flags)
 //par Kornakh
@@ -14,7 +14,6 @@ $nickname = $config['bot']['nickname'];
 $ident = VERSION;
 $gecos = 'Bot Kato Marika ' . VERSION;
 $channel = $config['irc']['channel'];
-
 
 $bentenmaru=new KatoMarika($server,$port,$password,$nickname,$ident,$gecos,$channel);
 $bentenmaru->connection();
@@ -51,6 +50,7 @@ nickname=KatoMarika
     exit(1);
   }
 }
+
 class KatoMarika{
   //set les variables utilisées dans certaines commandes irc
   private $opList=array();
@@ -83,6 +83,7 @@ class KatoMarika{
     $this->ident=$ident;
     $this->gecos=$gecos;
     $this->channel=$channel;
+
   }
   //gestion des erreurs
   public function connection(){
@@ -259,6 +260,41 @@ class KatoMarika{
         case ':'.$this->prefixe.'log':
           $this->appelConnexionHisto($d);
           break;
+
+        case ':'.$this->prefixe.'note':
+          switch($d[4]){
+            case 'ajout':
+              $db=$this->bdd();
+              $this->ajoutNote($d, $db);
+              $db->close();//ferme la bdd
+              break;
+
+            case 'select':
+              $db=$this->bdd();
+              $this->selectNote($d, $db);
+              $db->close();//ferme la bdd
+              break;
+
+            case 'liste':
+              $db=$this->bdd();
+              $this->listNote($d, $db);
+              $db->close();//ferme la bdd
+              break;
+
+            case 'suppr':
+              $db=$this->bdd();
+              $this->deleteNote($d, $db);
+              $db->close();//ferme la bdd
+              break;
+
+            default:
+              socket_write($this->socket, 'PRIVMSG '.$this->channel.' :.note ajout titre note : ajoute une note'."\r\n");
+              socket_write($this->socket, 'PRIVMSG '.$this->channel.' :.note select titre : afficher la note'."\r\n");
+              socket_write($this->socket, 'PRIVMSG '.$this->channel.' :.note liste : liste les notes existantes'."\r\n");
+              socket_write($this->socket, 'PRIVMSG '.$this->channel.' :.note suppr titre : supprime la note titre'."\r\n");
+              break;
+          }
+          break;
       }
 
 
@@ -310,6 +346,7 @@ class KatoMarika{
     socket_write($this->socket, 'NOTICE '.$demandeur.' :  '.$this->prefixe."roll ndf: Je lance n dés f, avec un maximum de 10 dés\r\n");
     socket_write($this->socket, 'NOTICE '.$demandeur.' :  '.$this->prefixe."log : Log les '.$this->logUserMax.' derniers user connectés ()\r\n");
     socket_write($this->socket, 'NOTICE '.$demandeur.' :  '.$this->prefixe."log nb: Change le nombre d'user max dans le log à nb\r\n");
+    socket_write($this->socket, 'NOTICE '.$demandeur.' :  '.$this->prefixe."note : Ajoute/supprime/liste/affiche une note\r\n");
   }
 
   function test($d){
@@ -611,6 +648,126 @@ class KatoMarika{
       }
     }
   }
-}
 
+  function bdd(){
+    //ouvre la bdd
+    $db = new sqlite3('./BDD/sqlite3.db');
+
+    if(!$db){
+      echo $db->lastErrorMsg();
+    }
+
+    //créé la table si elle n'existe pas déjà
+    $sql =<<<EOF
+        CREATE TABLE IF NOT EXISTS notes
+        (ID 				INTEGER PRIMARY KEY     NOT NULL,
+        PSEUDO           	TEXT   					NOT NULL,
+        TITRE           	TEXT            NOT NULL,
+        NOTE          		TEXT    				NOT NULL,
+        DATE            	TEXT    				NOT NULL);
+EOF;
+    $db->exec($sql);
+    return $db;
+  }
+
+  function ajoutNote($d, $db){
+    $demandeur=substr($d[0], 1);
+    $tab=explode("!",$demandeur);
+    $demandeur=$tab[0];
+    if((!is_null($d[5]))&&($d[5]!='')&&(!is_null($d[4]))&&($d[4]!='')){
+      $vali=$db->prepare("SELECT count(1) FROM notes where TITRE = (:TITRE)");
+    	$vali->bindValue(':TITRE', $d[5]);
+    	$ret = $db->exec($sql);
+    	$res=$vali->execute();
+    	$row = $res->fetchArray();
+    	if(!$res){
+    		echo $db->lastErrorMsg();
+    	}
+    	if($row[0]>0){
+    		socket_write($this->socket, 'PRIVMSG '.$this->channel.' :Désolé '.$demandeur.', mais une note portant ce titre existe déjà !'." \r\n");
+    	}else{
+        $i=6;
+        $note="";
+        while((!is_null($d[$i]))&&($d[$i]!='')){
+          $note=$note.$d[$i]." ";
+          $i++;
+        }
+        $ajout = $db->prepare("INSERT INTO notes (PSEUDO,TITRE,NOTE,DATE) VALUES (:PSEUDO,:TITRE,:NOTE,:DATE)");
+    		$ajout->bindValue(':PSEUDO', $demandeur);
+        $ajout->bindValue(':TITRE', $d[5]);
+    		$ajout->bindValue(':NOTE', $note);
+    		$ajout->bindValue(':DATE', date("d/m/y"));
+        $ret=$ajout->execute();//execute la requête
+    		if(!$ret){
+    			echo $db->lastErrorMsg();
+    		}
+    		echo "Note ajoutée";
+        socket_write($this->socket, 'PRIVMSG '.$this->channel.' :J\'ai bien enregistré ta note '.$demandeur.' :)'." \r\n");
+      }
+    }else{
+      socket_write($this->socket, 'PRIVMSG '.$this->channel.' :Ajoute un contenu à ta note '.$demandeur.' !'." \r\n");
+    }
+  }
+
+  function selectNote($d, $db){
+    if((!is_null($d[5]))&&($d[5]!='')){
+      $note = $db->prepare("SELECT * from notes where TITRE = (:TITRE)");
+  		$note->bindValue(':TITRE', $d[5]);
+  		$res = $note->execute();
+  		$row = $res->fetchArray();
+      if(count($row)<2){
+        socket_write($this->socket, 'PRIVMSG '.$this->channel.' :Désolé, cette note n\'existe pas encore :('." \r\n");
+      }else{
+        socket_write($this->socket, 'PRIVMSG '.$this->channel.' :'.$row[2].' par '.$row[1].' le '.$row[4]." : \r\n");
+        socket_write($this->socket, 'PRIVMSG '.$this->channel.' : '.$row[3]." \r\n");
+      }
+    }else{
+      socket_write($this->socket, 'PRIVMSG '.$this->channel.' :Précise moi une note à afficher. .note liste pour savoir quelles notes sont disponibles'." \r\n");
+    }
+  }
+
+  function listNote($d, $db){
+    $note = $db->prepare("SELECT TITRE from notes");
+    $res = $note->execute();
+    $row = $res->fetchArray();
+    if(count($row)<1){
+      socket_write($this->socket, 'PRIVMSG '.$this->channel.' :Désolé, je ne connais encore aucune note, .note ajout titre note pour en ajouter :)'." \r\n");
+    }else{
+      $notesExistante=$row[0].', ';
+      while($row=$res->fetchArray()){
+        $notesExistante=$notesExistante.$row[0].', ';
+      }
+      $notesExistante=rtrim($notesExistante,', ');
+      socket_write($this->socket, 'PRIVMSG '.$this->channel.' :Je connais les notes suivantes :'." \r\n");
+      socket_write($this->socket, 'PRIVMSG '.$this->channel.' : '.$notesExistante." \r\n");
+      socket_write($this->socket, 'PRIVMSG '.$this->channel.' :.note select titre pour afficher la note souhaitée '." \r\n");
+    }
+  }
+
+  function deleteNote($d, $db){
+    $demandeur=substr($d[0], 1);
+    $tab=explode("!",$demandeur);
+    $demandeur=$tab[0];
+    if((!is_null($d[5]))&&($d[5]!='')){
+      $note = $db->prepare("SELECT * from notes where TITRE = (:TITRE)");
+      $note->bindValue(':TITRE', $d[5]);
+      $res = $note->execute();
+      $row = $res->fetchArray();
+      if(count($row)<2){
+        socket_write($this->socket, 'PRIVMSG '.$this->channel.' :Désolé, cette note n\'existe pas.'." \r\n");
+      }else{
+        if(in_array($demandeur, $this->opList)||$demandeur==$row[1]){
+          $supp = $db->prepare("DELETE from notes where TITRE = (:TITRE)");
+          $supp->bindValue(':TITRE', $row[2]);
+          $supp->execute();
+          socket_write($this->socket, 'PRIVMSG '.$this->channel.' :J\'ai bien supprimé la note '.$row[2].". \r\n");
+        }else{
+          socket_write($this->socket, 'PRIVMSG '.$this->channel.' :Uniquement '.$row[1].' ou un OP peut supprimer cette note.'." \r\n");
+        }
+      }
+    }else{
+      socket_write($this->socket, 'PRIVMSG '.$this->channel.' :Précise une note à supprimer.'." \r\n");
+    }
+  }
+}
 ?>
