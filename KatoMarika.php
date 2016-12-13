@@ -40,7 +40,7 @@ function parseConfiFile($argv){
     $defaultConfig = "[irc]
 server =chat.freenode.net
 port=6667
-channel=bentenmaru
+channel=#bentenmaru
 
 [bot]
 nickname=KatoMarika
@@ -203,6 +203,7 @@ class KatoMarika{
         }
       }
 
+      //check si une commande est effectuée
       switch($d[3]){
         case ':'.$this->prefixe.'help':
           $this->help($d);
@@ -262,6 +263,7 @@ class KatoMarika{
           break;
 
         case ':'.$this->prefixe.'note':
+          //effectue une fonction différente en fonction du parametre de .note
           switch($d[4]){
             case 'ajout':
               $db=$this->bdd();
@@ -288,10 +290,10 @@ class KatoMarika{
               break;
 
             default:
-              socket_write($this->socket, 'PRIVMSG '.$this->channel.' :.note ajout titre note : ajoute une note'."\r\n");
-              socket_write($this->socket, 'PRIVMSG '.$this->channel.' :.note select titre : afficher la note'."\r\n");
-              socket_write($this->socket, 'PRIVMSG '.$this->channel.' :.note liste : liste les notes existantes'."\r\n");
-              socket_write($this->socket, 'PRIVMSG '.$this->channel.' :.note suppr titre : supprime la note titre'."\r\n");
+              socket_write($this->socket, 'PRIVMSG '.$this->channel.' :'.$this->prefixe.'note ajout titre note : ajoute une note'."\r\n");
+              socket_write($this->socket, 'PRIVMSG '.$this->channel.' :'.$this->prefixe.'note select titre : afficher la note'."\r\n");
+              socket_write($this->socket, 'PRIVMSG '.$this->channel.' :'.$this->prefixe.'note liste : liste les notes existantes'."\r\n");
+              socket_write($this->socket, 'PRIVMSG '.$this->channel.' :'.$this->prefixe.'note suppr titre : supprime la note titre'."\r\n");
               break;
           }
           break;
@@ -322,31 +324,97 @@ class KatoMarika{
       }
     }
   }
+
+  //affiche la liste liste des commandes
   function help($d){
     $demandeur=substr($d[0], 1);
     $tab=explode("!",$demandeur);
     $demandeur=$tab[0];
-    socket_write($this->socket, 'NOTICE '.$demandeur.' :Je suis '.$this->nickname.', un bot pour gérer '.$this->channel.", j'espère que tu seras gentil avec moi <3\r\n");
-    socket_write($this->socket, 'NOTICE '.$demandeur." :Je connais les commandes suivantes :\r\n");
-    socket_write($this->socket, 'NOTICE '.$demandeur.' :  '.$this->prefixe."test : Je renvois l'identifiant de l'user ainsi que son message.\r\n");
-    socket_write($this->socket, 'NOTICE '.$demandeur.' :  '.$this->prefixe."autokick : J'active ou désactive l'autokick, si la commande est utilisée avec les paramètres nombreSecondes et nombreMessage, je modifie le nombre de messages autorisé dans l'intervale de secondes précisé\r\n");
-    socket_write($this->socket, 'NOTICE '.$demandeur.' :  '.$this->prefixe."op : J'affiche les utilisateurs que je considère comme OP (si vous êtes OP et que je ne vous pas considère comme tel, faites /op votrePseudo).\r\n");
-    socket_write($this->socket, 'NOTICE '.$demandeur.' :  '.$this->prefixe."op pseudo : J'ajoute pseudo en tant que op\r\n");
-    socket_write($this->socket, 'NOTICE '.$demandeur.' :  '.$this->prefixe."deop pseudo : J'enlève pseudo en tant que op\r\n");
-    socket_write($this->socket, 'NOTICE '.$demandeur.' :  '.$this->prefixe."unop : Je m'enlève le statut d'OP, mais pourquoi me feriez vous faire ça ? :(\r\n");
-    socket_write($this->socket, 'NOTICE '.$demandeur.' :  '.$this->prefixe."voice user : J'autorise un user à parler sur un channel modéré\r\n");
-    socket_write($this->socket, 'NOTICE '.$demandeur.' :  '.$this->prefixe."unvoice user : J'enlève les droits d'un user de parler sur un channel modéré (ça c'est si vous n'êtes pas gentils)\r\n");
-    socket_write($this->socket, 'NOTICE '.$demandeur.' :  '.$this->prefixe."prefixe nouveauPrefixe : Je change le préfixe d'appel de mes commandes, le préfixe actuel est ".$this->prefixe."\r\n");
-    socket_write($this->socket, 'NOTICE '.$demandeur.' :  '.$this->prefixe."trivia : J'active ou désactive le trivia et l'autokick\r\n");
-    socket_write($this->socket, 'NOTICE '.$demandeur.' :  '.$this->prefixe."say truc à dire : Je dis ce qu'on me dis de dire\r\n");
-    socket_write($this->socket, 'NOTICE '.$demandeur.' :  '.$this->prefixe."autokick : J'active ou désactive l'autokick\r\n");
-    socket_write($this->socket, 'NOTICE '.$demandeur.' :  '.$this->prefixe."autokick delai messsage: J'active l'autokick et change le nombre de messages autorisés en delai secondes\r\n");
-    socket_write($this->socket, 'NOTICE '.$demandeur.' :  '.$this->prefixe."autokick help : Je dis si l'autokick est activé ou non et affiche le nombre de messages maximum pendant quelle durée\r\n");
-    socket_write($this->socket, 'NOTICE '.$demandeur.' :  '.$this->prefixe."radio : J'annonce les musiques en cours de diffusion sur https://j-pop.moe\r\n");
-    socket_write($this->socket, 'NOTICE '.$demandeur.' :  '.$this->prefixe."roll ndf: Je lance n dés f, avec un maximum de 10 dés\r\n");
-    socket_write($this->socket, 'NOTICE '.$demandeur.' :  '.$this->prefixe."log : Log les '.$this->logUserMax.' derniers user connectés ()\r\n");
-    socket_write($this->socket, 'NOTICE '.$demandeur.' :  '.$this->prefixe."log nb: Change le nombre d'user max dans le log à nb\r\n");
-    socket_write($this->socket, 'NOTICE '.$demandeur.' :  '.$this->prefixe."note : Ajoute/supprime/liste/affiche une note\r\n");
+    if (!is_null($d[4])&&($d[4]!='')) {
+      switch ($d[4]) {
+        case 'test':
+          socket_write($this->socket, 'NOTICE '.$demandeur.' :  '.$this->prefixe."test : Je renvois l'identifiant de l'user ainsi que son message.\r\n");
+          break;
+
+        case 'autokick':
+          socket_write($this->socket, 'NOTICE '.$demandeur.' :  '.$this->prefixe."autokick : J'active ou désactive l'autokick\r\n");
+          socket_write($this->socket, 'NOTICE '.$demandeur.' :  '.$this->prefixe."autokick nbSec nbMess: Je modifie le nombre de messages autorisé dans l'intervale de secondes précisé\r\n");
+          socket_write($this->socket, 'NOTICE '.$demandeur." :  Ces commandes sont uniquement effectuables par un op.\r\n");
+          break;
+
+        case 'op':
+          socket_write($this->socket, 'NOTICE '.$demandeur.' :  '.$this->prefixe."op : J'affiche les utilisateurs que je considère comme OP (si vous êtes OP et que je ne vous pas considère comme tel, faites /op votrePseudo).\r\n");
+          socket_write($this->socket, 'NOTICE '.$demandeur.' :  '.$this->prefixe."op pseudo : J'ajoute pseudo en tant que op, seulement quelqu'un déjà op peut ajouter un op.\r\n");
+          break;
+
+        case 'deop':
+          socket_write($this->socket, 'NOTICE '.$demandeur.' :  '.$this->prefixe."deop pseudo : J'enlève pseudo en tant que op\r\n");
+          socket_write($this->socket, 'NOTICE '.$demandeur." :  Cette commande est uniquement effectuable par un op.\r\n");
+          break;
+
+        case 'unop':
+          socket_write($this->socket, 'NOTICE '.$demandeur.' :  '.$this->prefixe."unop : Je m'enlève le statut d'OP, mais pourquoi me feriez vous faire ça ? :( Et en plus, seulement un op peut le faire !\r\n");
+          break;
+
+        case 'voice':
+          socket_write($this->socket, 'NOTICE '.$demandeur.' :  '.$this->prefixe."voice user : J'autorise un user à parler sur un channel modéré, seulement un op peut effectuer cette commande.\r\n");
+          break;
+
+        case 'unvoice':
+          socket_write($this->socket, 'NOTICE '.$demandeur.' :  '.$this->prefixe."unvoice user : J'enlève les droits d'un user de parler sur un channel modéré (ça c'est si vous n'êtes pas gentils), seulement un op peut effectuer cette commande.\r\n");
+          break;
+
+        case 'prefixe':
+          socket_write($this->socket, 'NOTICE '.$demandeur.' :  '.$this->prefixe."prefixe nouveauPrefixe : Je change le préfixe d'appel de mes commandes, le préfixe actuel est ".$this->prefixe."\r\n");
+          socket_write($this->socket, 'NOTICE '.$demandeur.' :  Seulement un op peut effectuer cette commande.'."\r\n");
+          break;
+
+        case 'trivia':
+          socket_write($this->socket, 'NOTICE '.$demandeur.' :  '.$this->prefixe."trivia : J'active ou désactive le trivia, seulement un op peut le faire.\r\n");
+          break;
+
+        case 'say':
+          socket_write($this->socket, 'NOTICE '.$demandeur.' :  '.$this->prefixe."say truc à dire : Je dis ce qu'on me dis de dire.\r\n");
+          break;
+
+        case 'autokick':
+          socket_write($this->socket, 'NOTICE '.$demandeur.' :  '.$this->prefixe."autokick : J'active ou désactive l'autokick\r\n");
+          socket_write($this->socket, 'NOTICE '.$demandeur.' :  '.$this->prefixe."autokick delai messsage: J'active l'autokick et change le nombre de messages autorisés en delai secondes\r\n");
+          socket_write($this->socket, 'NOTICE '.$demandeur." :  Ces commandes sont uniquement effectuables par un op.\r\n");
+          socket_write($this->socket, 'NOTICE '.$demandeur.' :  '.$this->prefixe."autokick help : Je dis si l'autokick est activé ou non et affiche le nombre de messages maximum pendant quelle durée.\r\n");
+          break;
+
+        case 'radio':
+          socket_write($this->socket, 'NOTICE '.$demandeur.' :  '.$this->prefixe."radio : J'annonce les musiques en cours de diffusion sur https://j-pop.moe .\r\n");
+          break;
+
+        case 'roll':
+          socket_write($this->socket, 'NOTICE '.$demandeur.' :  '.$this->prefixe."roll ndf: Je lance n dés f, avec un maximum de 10 dés.\r\n");
+          break;
+
+        case 'log':
+          socket_write($this->socket, 'NOTICE '.$demandeur.' :  '.$this->prefixe."log : J'affiche les '.$this->logUserMax.' derniers user connectés\r\n");
+          socket_write($this->socket, 'NOTICE '.$demandeur.' :  '.$this->prefixe."log nb: Je change le nombre d'user max dans le log à nb, seul un op peut faire cette commande.\r\n");
+          break;
+
+        case 'note':
+          socket_write($this->socket, 'NOTICE '.$demandeur.' :  '.$this->prefixe.'note ajout titre note : j\'ajoute une note'."\r\n");
+          socket_write($this->socket, 'NOTICE '.$demandeur.' :  '.$this->prefixe.'note select titre : j\'affiche la note titre'."\r\n");
+          socket_write($this->socket, 'NOTICE '.$demandeur.' :  '.$this->prefixe.'note liste : je liste les notes existantes'."\r\n");
+          socket_write($this->socket, 'NOTICE '.$demandeur.' :  '.$this->prefixe.'note suppr titre : je supprime la note titre (seul un op ou le créateur de la note peut le faire)'."\r\n");
+          break;
+
+        default:
+          socket_write($this->socket, 'NOTICE '.$demandeur." :  Je ne connais pas cette commande :(\r\n");
+          break;
+
+      }
+    }else{
+      socket_write($this->socket, 'NOTICE '.$demandeur.' :Je suis '.$this->nickname.', un bot pour gérer '.$this->channel.", j'espère que tu seras gentil avec moi <3\r\n");
+      socket_write($this->socket, 'NOTICE '.$demandeur." :Je connais les commandes suivantes :\r\n");
+      socket_write($this->socket, 'NOTICE '.$demandeur." :  test, autokick, op, deop, unop, voice, unvoice, prefixe, trivia, say, autokick, radio, roll, log et note\r\n");
+      socket_write($this->socket, 'NOTICE '.$demandeur." :  Fais .help nomDeCommande pour en savoir plus sur une commande\r\n");
+    }
   }
 
   function test($d){
