@@ -27,7 +27,7 @@ function parseConfiFile($argv){
       $config['irc']['port'] = 6667;
     }
     if(empty($config['irc']['channel'])){
-      $config['irc']['channel'] = 'bentenmaru';
+      $config['irc']['channel'] = '#pathey';
     }
     if(empty($config['bot']['nickname'])){
       $config['bot']['nickname'] = 'KatoMarika';
